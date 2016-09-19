@@ -7,6 +7,7 @@ const Player = require('./player.js');
 
 /* Global variables */
 var canvas = document.getElementById('screen');
+var ctx = canvas.getContext('2d');
 var game = new Game(canvas, update, render);
 var player = new Player({x: 0, y: 240})
 
@@ -49,7 +50,7 @@ function render(elapsedTime, ctx) {
   // ctx.fillStyle = "lightblue";
   // ctx.fillRect(0, 0, canvas.width, canvas.height);
   // ctx.drawImage(drawImage, 0, 0);
-  canvas.getContext('2d').drawImage(image, 0, 0);
+  ctx.drawImage(image, 0, 0);
   player.render(elapsedTime, ctx);
 }
 
@@ -143,7 +144,7 @@ function Player(position) {
     console.log("State on Key Down: ", self.state);
     switch (event.keyCode) {
       case 68:
-        self.state = "walking"
+        self.state = "hopping"
         break;
     }
   }
@@ -172,13 +173,13 @@ Player.prototype.update = function(time) {
       }
       break;
     // TODO: Implement your player's update by state
-    case "walking":
+    case "hopping":
       this.timer += time;
       if (this.timer > MS_PER_FRAME) {
         this.frame = (this.frame + 1) % 4;
         this.timer = 0;
       }
-      this.x += 1;
+      this.x += 12;
       break;
   }
 }
@@ -191,6 +192,12 @@ Player.prototype.update = function(time) {
 Player.prototype.render = function(time, ctx) {
   switch(this.state) {
     case "idle":
+      // console.log("Spritesheet: ", this.spritesheet);
+      console.log("Frame: ", this.frame);
+      // console.log("Width: ", this.width);
+      // console.log("Height: ", this.height);
+      // console.log("X: : ", this.x);
+      // console.log("Y: ", this.y);
       ctx.drawImage(
         // image
         this.spritesheet,
@@ -201,6 +208,13 @@ Player.prototype.render = function(time, ctx) {
       );
       break;
     // TODO: Implement your player's redering according to state
+    case "hopping":
+      ctx.drawImage(
+        this.spritesheet,
+        this.frame * 64, 0, this.width, this.height,
+        this.x, this.y, this.width, this.heigth
+      );
+      break;
   }
 }
 

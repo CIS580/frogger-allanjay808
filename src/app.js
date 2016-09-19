@@ -49,6 +49,6 @@ function render(elapsedTime, ctx) {
   // ctx.fillStyle = "lightblue";
   // ctx.fillRect(0, 0, canvas.width, canvas.height);
   // ctx.drawImage(drawImage, 0, 0);
-  ctx.drawImage(image,90,130,50,60,10,10,50,60);
+  ctx.drawImage(image, 0, 0);
   player.render(elapsedTime, ctx);
 }
