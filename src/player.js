@@ -22,13 +22,32 @@ function Player(position) {
   this.spritesheet.src = encodeURI('assets/PlayerSprite2.png');
   this.timer = 0;
   this.frame = 0;
+
+  var self = this;
+  window.onkeydown = function(event) {
+    console.log("Key Down Event: ", event.keyCode);
+    console.log("State on Key Down: ", self.state);
+    switch (event.keyCode) {
+      case 68:
+        self.state = "walking"
+        break;
+    }
+  }
+
+  window.onkeyup = function(event) {
+    self.state = "idle";
+  }
 }
+
+
+
 
 /**
  * @function updates the player object
  * {DOMHighResTimeStamp} time the elapsed time since the last frame
  */
 Player.prototype.update = function(time) {
+  console.log("State: ", this.state);
   switch(this.state) {
     case "idle":
       this.timer += time;
@@ -39,6 +58,14 @@ Player.prototype.update = function(time) {
       }
       break;
     // TODO: Implement your player's update by state
+    case "walking":
+      this.timer += time;
+      if (this.timer > MS_PER_FRAME) {
+        this.frame = (this.frame + 1) % 4;
+        this.timer = 0;
+      }
+      this.x += 1;
+      break;
   }
 }
 

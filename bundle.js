@@ -10,6 +10,9 @@ var canvas = document.getElementById('screen');
 var game = new Game(canvas, update, render);
 var player = new Player({x: 0, y: 240})
 
+var image = new Image();
+image.src = "./assets/game_background.png";
+
 /**
  * @function masterLoop
  * Advances the game in sync with the refresh rate of the screen
@@ -43,8 +46,10 @@ function update(elapsedTime) {
   * @param {CanvasRenderingContext2D} ctx the context to render to
   */
 function render(elapsedTime, ctx) {
-  ctx.fillStyle = "lightblue";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // ctx.fillStyle = "lightblue";
+  // ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // ctx.drawImage(drawImage, 0, 0);
+  canvas.getContext('2d').drawImage(image, 0, 0);
   player.render(elapsedTime, ctx);
 }
 
@@ -131,13 +136,32 @@ function Player(position) {
   this.spritesheet.src = encodeURI('assets/PlayerSprite2.png');
   this.timer = 0;
   this.frame = 0;
+
+  var self = this;
+  window.onkeydown = function(event) {
+    console.log("Key Down Event: ", event.keyCode);
+    console.log("State on Key Down: ", self.state);
+    switch (event.keyCode) {
+      case 68:
+        self.state = "walking"
+        break;
+    }
+  }
+
+  window.onkeyup = function(event) {
+    self.state = "idle";
+  }
 }
+
+
+
 
 /**
  * @function updates the player object
  * {DOMHighResTimeStamp} time the elapsed time since the last frame
  */
 Player.prototype.update = function(time) {
+  console.log("State: ", this.state);
   switch(this.state) {
     case "idle":
       this.timer += time;
@@ -148,6 +172,14 @@ Player.prototype.update = function(time) {
       }
       break;
     // TODO: Implement your player's update by state
+    case "walking":
+      this.timer += time;
+      if (this.timer > MS_PER_FRAME) {
+        this.frame = (this.frame + 1) % 4;
+        this.timer = 0;
+      }
+      this.x += 1;
+      break;
   }
 }
 
