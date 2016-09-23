@@ -1,6 +1,7 @@
 "use strict";
 
-const MS_PER_FRAME = 1000/8;
+const MS_PER_FRAME = 1000/16;
+const jumpDistance = 16;
 
 /**
  * @module exports the Player class
@@ -29,23 +30,44 @@ function Player(position) {
   this.left = false;
   this.right = false;
 
+  this.logDirUp = true;
+  this.yspeed = 0;
   self = this;
 }
 
 window.onkeydown = function(event) {
+  if (self.state == "hopping") {
+    // Can't move in middle of hop, he is not a super frog
+    return;
+  }
   switch (event.keyCode) {
     // Right
     case 68:
-      // if (self.state == "hopping") {
-      //   break;
-      // }
       self.right = true;
-      self.frame = 0;
-      self.state = "hopping";
+      isHopping();
       break;
     // Left
     case 65:
+      self.left = true;
+      isHopping();
+      break;
+    // Up
+    case 87:
+      self.up = true;
+      isHopping();
+      break;
+    // Down
+    case 83:
+      self.down = true;
+      isHopping();
+      break;
   }
+}
+
+function isHopping() {
+  self.frame = 0;
+  self.state = "hopping";
+  self.yspeed = 0;
 }
 
 /**
@@ -55,29 +77,46 @@ window.onkeydown = function(event) {
 Player.prototype.update = function(time) {
   switch(this.state) {
     case "idle":
+      resetDirection();
       this.timer += time;
-      // console.log("Timer: ", this.timer);
       if(this.timer > MS_PER_FRAME) {
         this.timer = 0;
         this.frame += 1;
         if(this.frame > 3) this.frame = 0;
       }
       break;
-    // TODO: Implement your player's update by state
     case "hopping":
 
       this.timer += time;
 
       if (this.timer > MS_PER_FRAME) {
+        this.timer = 0;
         this.frame++;
-        this.x += 16;
+        move();
       }
 
       if (this.frame > 3) {
+        this.timer = 0;
         this.frame = 0;
         this.state = "idle";
       }
 
+      break;
+    case "onLog" :
+
+      if (this.logDirUp) {
+        this.y -= this.yspeed;
+      } else {
+        this.y += this.yspeed;
+      }
+
+      this.timer += time;
+
+      if(this.timer > MS_PER_FRAME) {
+        this.timer = 0;
+        this.frame += 1;
+        if(this.frame > 3) this.frame = 0;
+      }
       break;
   }
 }
@@ -89,7 +128,8 @@ Player.prototype.update = function(time) {
  */
 Player.prototype.render = function(time, ctx) {
   switch(this.state) {
-    case "idle":
+    case "onLog" :
+    case "idle" :
       ctx.drawImage(
         // image
         this.spritesheet,
@@ -99,8 +139,7 @@ Player.prototype.render = function(time, ctx) {
         this.x, this.y, this.width, this.height
       );
       break;
-    // TODO: Implement your player's redering according to state
-    case "hopping":
+    case "hopping" :
       ctx.drawImage(
         // image
         this.spritesheet,
@@ -110,5 +149,55 @@ Player.prototype.render = function(time, ctx) {
         this.x, this.y, this.width, this.height
       );
       break;
+
   }
+}
+
+/**
+  * @function checkOnLog
+  * Check if player is on a log
+  */
+Player.prototype.checkOnLog = function(allLogs) {
+  for (var i = 0; i < allLogs.length; i++) {
+    var logX = allLogs[i].x;
+    var logY = allLogs[i].y;
+    var logDirection = allLogs[i].up;
+    var logSpeed = allLogs[i].speed;
+    if (this.x == logX && (this.y >= (logY - 48) && this.y <= (logY + 80)) && this.state != "hopping") {
+
+      this.state = "onLog";
+      this.logDirUp = logDirection;
+      this.yspeed = logSpeed / 4;
+      break;
+  }
+
+  }
+}
+
+/**
+  * @function Check if player reaches end
+  */
+Player.prototype.reachedEnd = function() {
+  if ((this.x + this.width) > 760) {
+    return true;
+  }
+}
+
+function move() {
+  if (self.right) {
+    self.x += jumpDistance;
+  } else if (self.left) {
+    self.x -= jumpDistance;
+  } else if (self.up) {
+    self.y -= jumpDistance;
+  } else if (self.down) {
+    self.y += jumpDistance;
+  }
+}
+
+function resetDirection() {
+  self.right = false;
+  self.left = false;
+  self.up = false;
+  self.down = false;
 }
