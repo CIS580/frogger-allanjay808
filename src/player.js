@@ -164,13 +164,11 @@ Player.prototype.checkOnLog = function(allLogs) {
     var logDirection = allLogs[i].up;
     var logSpeed = allLogs[i].speed;
     if (this.x == logX && (this.y >= (logY - 48) && this.y <= (logY + 80)) && this.state != "hopping") {
-
       this.state = "onLog";
       this.logDirUp = logDirection;
       this.yspeed = logSpeed / 4;
       break;
-  }
-
+    }
   }
 }
 

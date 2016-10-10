@@ -39,7 +39,6 @@ CarDown.prototype.update = function(time) {
       }
       break;
   }
-  this.color = '#000000';
 }
 
 /**
@@ -56,8 +55,6 @@ CarDown.prototype.update = function(time) {
      // destination rectangle
      this.x, this.y, this.width, this.height
    );
-   ctx.strokeStyle = this.color;
-   ctx.strokeRect(this.x, this.y, this.width, this.height);
  }
 
  CarDown.prototype.isOffCanvas = function() {

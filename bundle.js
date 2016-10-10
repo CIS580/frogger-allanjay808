@@ -12,77 +12,94 @@ const Log = require('./log.js');
 /* Global variables */
 var canvas = document.getElementById('screen');
 var ctx = canvas.getContext('2d');
-var game = new Game(canvas, update, render);
-var gameIsOver = false;
-var score = 0;
-var lives = 3;
-var level = 0;
-var carDown = new CarDown({x: 128, y: -128});
-var carDown2 = new CarDown({x: 320, y: -128});
-var carUp = new CarUp({x: 192, y: 640});
-var carUp2 = new CarUp({x: 384, y: 640});
-var player = new Player({x: 0, y: 320});
-
-carDown2.setSpeed(18);
-carUp2.setSpeed(20);
+var game;
+var gameOver = false;
+var score;
+var lives;
+var level;
+var carDown;
+var carDown2;
+var carUp;
+var carUp2;
+var player;
 
 var carsDown = [];
 var carsUp = [];
-carsDown.push(carDown);
-carsDown.push(carDown2);
-carsUp.push(carUp);
-carsUp.push(carUp2);
 
 var arrLogsDown = [];
 var arrLogsDown2 = [];
 var arrLogsUp = [];
 
-// Create first set of logs going down
-var logx = 512;
-var logy = -128;
-for (var i = 0; i < 3; i++) {
-  var log = new Log({x: logx, y: logy});
-  arrLogsDown.push(log);
-  logy += 256;
-}
+var allLogs;
 
-// Create second set of logs going down
-logx = 640;
-logy = -128;
-for (var i = 0; i < 3; i++) {
-  var log = new Log({x: logx, y: logy});
-  arrLogsDown2.push(log);
-  logy += 256;
-}
+var entities;
 
-// Create set of logs going up
-logx = 576;
-logy = 640;
-for (var i = 0; i < 3; i++) {
-  var log = new Log({x: logx, y: logy});
-  arrLogsUp.push(log);
-  logy -= 256;
-}
 
-// Set direction and speed of logs, leave first set at default
-for (var i = 0; i < 3; i++) {
-  arrLogsDown2[i].setDirection(true);
-  arrLogsDown2[i].setSpeed(12);
-  arrLogsUp[i].setDirection(false);
-  arrLogsUp[i].setSpeed(10);
-
-}
-
-var allLogs = arrLogsDown.concat(arrLogsUp);
-allLogs = allLogs.concat(arrLogsDown2);
-
-var entities = new EntityManager(canvas.width, canvas.height, 64);
-
-entities.addEntity(player);
-entities.addEntity(carDown);
-entities.addEntity(carUp);
-entities.addEntity(carDown2);
-entities.addEntity(carUp2);
+  // game = new Game(canvas, update, render);
+  //
+  // carDown = new CarDown({x: 128, y: -128});
+  // carDown2 = new CarDown({x: 320, y: -128});
+  // carUp = new CarUp({x: 192, y: 640});
+  // carUp2 = new CarUp({x: 384, y: 640});
+  // player = new Player({x: 0, y: 320});
+  //
+  // carDown2.setSpeed(18);
+  // carUp2.setSpeed(20);
+  //
+  // carsDown.push(carDown);
+  // carsDown.push(carDown2);
+  // carsUp.push(carUp);
+  // carsUp.push(carUp2);
+  //
+  // score = 0;
+  // lives = 3;
+  // level = 0;
+  //
+  // // Create first set of logs going down
+  // var logx = 512;
+  // var logy = -128;
+  // for (var i = 0; i < 3; i++) {
+  //   var log = new Log({x: logx, y: logy});
+  //   arrLogsDown.push(log);
+  //   logy += 256;
+  // }
+  //
+  // // Create second set of logs going down
+  // logx = 640;
+  // logy = -128;
+  // for (var i = 0; i < 3; i++) {
+  //   var log = new Log({x: logx, y: logy});
+  //   arrLogsDown2.push(log);
+  //   logy += 256;
+  // }
+  //
+  // // Create set of logs going up
+  // logx = 576;
+  // logy = 640;
+  // for (var i = 0; i < 3; i++) {
+  //   var log = new Log({x: logx, y: logy});
+  //   arrLogsUp.push(log);
+  //   logy -= 256;
+  // }
+  //
+  // // Set direction and speed of logs, leave first set at default
+  // for (var i = 0; i < 3; i++) {
+  //   arrLogsDown2[i].setDirection(true);
+  //   arrLogsDown2[i].setSpeed(12);
+  //   arrLogsUp[i].setDirection(false);
+  //   arrLogsUp[i].setSpeed(10);
+  // }
+  //
+  // allLogs = arrLogsDown.concat(arrLogsUp);
+  // allLogs = allLogs.concat(arrLogsDown2);
+  //
+  // entities = new EntityManager(canvas.width, canvas.height, 64);
+  //
+  // entities.addEntity(player);
+  // entities.addEntity(carDown);
+  // entities.addEntity(carUp);
+  // entities.addEntity(carDown2);
+  // entities.addEntity(carUp2);
 
 var image = new Image();
 image.src = "./assets/background.png";
@@ -93,7 +110,7 @@ image.src = "./assets/background.png";
  * @param {DOMHighResTimeStamp} timestamp the current time
  */
 var masterLoop = function(timestamp) {
-  if (!gameIsOver) {
+  if (!gameOver) {
     setTimeout(function() {
       game.loop(timestamp);
     }, 1000/16);
@@ -102,6 +119,76 @@ var masterLoop = function(timestamp) {
   window.requestAnimationFrame(masterLoop);
 }
 masterLoop(performance.now());
+
+function initialize() {
+
+  game = new Game(canvas, update, render);
+
+  carDown = new CarDown({x: 128, y: -128});
+  carDown2 = new CarDown({x: 320, y: -128});
+  carUp = new CarUp({x: 192, y: 640});
+  carUp2 = new CarUp({x: 384, y: 640});
+  player = new Player({x: 0, y: 320});
+
+  carDown2.setSpeed(18);
+  carUp2.setSpeed(20);
+
+  carsDown.push(carDown);
+  carsDown.push(carDown2);
+  carsUp.push(carUp);
+  carsUp.push(carUp2);
+
+  score = 0;
+  lives = 3;
+  level = 0;
+
+  // Create first set of logs going down
+  var logx = 512;
+  var logy = -128;
+  for (var i = 0; i < 3; i++) {
+    var log = new Log({x: logx, y: logy});
+    arrLogsDown.push(log);
+    logy += 256;
+  }
+
+  // Create second set of logs going down
+  logx = 640;
+  logy = -128;
+  for (var i = 0; i < 3; i++) {
+    var log = new Log({x: logx, y: logy});
+    arrLogsDown2.push(log);
+    logy += 256;
+  }
+
+  // Create set of logs going up
+  logx = 576;
+  logy = 640;
+  for (var i = 0; i < 3; i++) {
+    var log = new Log({x: logx, y: logy});
+    arrLogsUp.push(log);
+    logy -= 256;
+  }
+
+  // Set direction and speed of logs, leave first set at default
+  for (var i = 0; i < 3; i++) {
+    arrLogsDown2[i].setDirection(true);
+    arrLogsDown2[i].setSpeed(12);
+    arrLogsUp[i].setDirection(false);
+    arrLogsUp[i].setSpeed(10);
+  }
+
+  allLogs = arrLogsDown.concat(arrLogsUp);
+  allLogs = allLogs.concat(arrLogsDown2);
+
+  entities = new EntityManager(canvas.width, canvas.height, 64);
+
+  entities.addEntity(player);
+  entities.addEntity(carDown);
+  entities.addEntity(carUp);
+  entities.addEntity(carDown2);
+  entities.addEntity(carUp2);
+}
+initialize();
 
 /**
  * @function update
@@ -112,6 +199,11 @@ masterLoop(performance.now());
  * the number of milliseconds passed since the last frame.
  */
 function update(elapsedTime) {
+
+  if (isGameOver()) {
+    gameOver = true;
+    return true;
+  }
 
   // Update cars
   for (var i = 0; i < 2; i++) {
@@ -171,10 +263,10 @@ function render(elapsedTime, ctx) {
   trackScore();
   trackLives();
 
-  if (lives == 0) {
-    isGameOver();
+  if (gameOver) {
+    displayGameOver();
   }
-  }
+}
 
 /**
   * @function checkForCollisions
@@ -258,32 +350,56 @@ function resetPlayerPosition() {
   * @function isGameOver
   */
 function isGameOver() {
-  if (lives == 0) {
-    gameIsOver = true;
+  if (lives == -1) {
     lives = 0;
     trackLives();
     player.x = -64;
     player.y = -64;
-
-    ctx.font = "bold 16px Arial";
-    ctx.fillStyle = "white";
-    var message = "Game Over! Click anywhere to Restart";
-    ctx.fillText(message, 240, 240);
+    return true;
   }
 }
 
+/**
+  * @function displayGameOver
+  */
+function displayGameOver() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.font = "bold 48px Arial";
+  ctx.fillStyle = "red";
+  var gameOverText = "Game Over!";
+  var scoreText = "Score: " + score;
+  var gameOverHelp = "Press 'Enter' to restart";
+  ctx.fillText(gameOverText, 260, 300);
+  ctx.fillText(scoreText, 280, 350);
+  ctx.font = "bold 32px Arial";
+  ctx.fillText(gameOverHelp, 220, 390);
+
+}
+
+// Restart game if game is over
 document.onkeydown = function(event) {
+  // Enter key
   switch (event.keyCode) {
     case 13:
-      if (gameIsOver == true) {
-        gameIsOver = false;
-        setTimeout(function() {
-          game.loop(timestamp);
-        }, 1000/16);
-      }
-      break;
-    default:
+      if (gameOver == true) {
+        console.log('Enter');
+        carsDown = [];
+        carsUp = [];
 
+        arrLogsDown = [];
+        arrLogsDown2 = [];
+        arrLogsUp = [];
+
+        player.x = 0;
+        player.y = 320;
+        gameOver = false;
+        initialize();
+        masterLoop(performance.now());
+        break;
+
+      }
   }
 }
 
@@ -329,7 +445,6 @@ CarDown.prototype.update = function(time) {
       }
       break;
   }
-  this.color = '#000000';
 }
 
 /**
@@ -346,8 +461,6 @@ CarDown.prototype.update = function(time) {
      // destination rectangle
      this.x, this.y, this.width, this.height
    );
-   ctx.strokeStyle = this.color;
-   ctx.strokeRect(this.x, this.y, this.width, this.height);
  }
 
  CarDown.prototype.isOffCanvas = function() {
@@ -402,7 +515,6 @@ CarUp.prototype.update = function(time) {
       }
       break;
   }
-  this.color = '#000000';
 }
 
 /**
@@ -419,8 +531,6 @@ CarUp.prototype.update = function(time) {
      // destination rectangle
      this.x, this.y, this.width, this.height
    );
-   ctx.strokeStyle = this.color;
-   ctx.strokeRect(this.x, this.y, this.width, this.height);
  }
 
 
@@ -847,13 +957,11 @@ Player.prototype.checkOnLog = function(allLogs) {
     var logDirection = allLogs[i].up;
     var logSpeed = allLogs[i].speed;
     if (this.x == logX && (this.y >= (logY - 48) && this.y <= (logY + 80)) && this.state != "hopping") {
-
       this.state = "onLog";
       this.logDirUp = logDirection;
       this.yspeed = logSpeed / 4;
       break;
-  }
-
+    }
   }
 }
 
